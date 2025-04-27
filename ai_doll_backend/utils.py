@@ -5,9 +5,13 @@ from django.contrib.auth.models import AnonymousUser
 from .interfaces import IResponse, IResponseList
 import inspect
 from .AsyncLogging import AsyncLogger
+from rest_framework.request import Request as DRFRequest
 import logging
-from typing import Any
+from typing import Dict, Any, Optional, Callable, Tuple, List
+from functools import wraps
 
+
+VIEW_FUNCTION_TYPE = Callable[..., Any]
 
 class CustomLoggerAdapter(logging.LoggerAdapter[logging.Logger]):
     def process(self, msg, kwargs):
@@ -85,3 +89,28 @@ def generate_success_generic_response(
         rsp.to_dict(),
         status=status.HTTP_200_OK,
     )
+
+def aweme_login_required(
+    function: Optional[VIEW_FUNCTION_TYPE] = None,
+) -> VIEW_FUNCTION_TYPE:
+    """
+    Decorator for views that checks that the user is logged in, redirecting
+    to the log-in page if necessary.
+    """
+
+    def decorator(view_func: VIEW_FUNCTION_TYPE) -> VIEW_FUNCTION_TYPE:
+        @wraps(view_func)
+        def _wrapper_view(request: DRFRequest, *args, **kwargs):
+            if request.user.is_authenticated:
+                return view_func(request, *args, **kwargs)
+            return generate_fail_generic_response(
+                message="Incorrect authentication",
+                data={},
+                skip_logging=True,
+            )
+
+        return _wrapper_view
+
+    if function:
+        return decorator(function)
+    return decorator
