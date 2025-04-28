@@ -67,6 +67,7 @@ class AwemeCustomUser(AbstractUser):
     history = HistoricalRecords(cascade_delete_history=True)  # Track all the changes
     provider = models.CharField(max_length=255, blank=True, null=True)
     provider_id = models.CharField(max_length=255, blank=True, null=True)
+    provider_avatar_url = models.CharField(max_length=255, blank=True, null=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []

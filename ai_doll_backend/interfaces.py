@@ -11,6 +11,12 @@ T = TypeVar("T")
 
 
 @dataclass
+class IUserProfile:
+    email: Optional[str] = None
+    nick_name: Optional[str] = None
+    provider_avatar_url: Optional[str] = None
+
+@dataclass
 class IResponseList(Generic[T]):
     total: int
     page: int

@@ -34,3 +34,4 @@ types-PyYAML==6.0.12.20250402
 types-requests==2.32.0.20250328
 typing_extensions==4.13.2
 urllib3==2.4.0
+mysqlclient==2.2.7
