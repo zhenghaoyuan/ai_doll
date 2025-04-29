@@ -4,12 +4,12 @@
 - Generate db migration configs (no actual change on the db)
 
   ```
-  ENVIRONMENT=dev python manage.py makemigrations ai_doll_backend
+  ENVIRONMENT=dev python manage.py makemigrations ai_art_backend
   ```
 
 - Print the generated db migration configs at 0001 (no actual change on the db)
   ```
-  ENVIRONMENT=dev python manage.py sqlmigrate ai_doll_backend 0001
+  ENVIRONMENT=dev python manage.py sqlmigrate ai_art_backend 0001
   ```
 - Apply db migration
   ```
@@ -30,13 +30,13 @@
 - Static type check
 
   ```
-  ENVIRONMENT=dev  PYTHONPATH="$PYTHONPATH:$PWD" mypy ai_doll_backend
+  ENVIRONMENT=dev  PYTHONPATH="$PYTHONPATH:$PWD" mypy ai_art_backend
   ```
 
 - Format
 
   ```
-  ENVIRONMENT=dev  black ai_doll_backend
+  ENVIRONMENT=dev  black ai_art_backend
   ```
 
 - Create superuser for django admin
@@ -69,7 +69,7 @@ container_commands:
 
 ```
 git add -f .env.prod &&
-git add -f ai_doll_backend/migrations/*.py &&
+git add -f ai_art_backend/migrations/*.py &&
 git add .ebextensions/* &&
 git add requirements.txt &&
 git add anime_gf/settings.py
