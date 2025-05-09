@@ -2,16 +2,17 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import AwemeCustomUser
 from django.contrib.auth.models import AnonymousUser
-from .interfaces import IResponse, IResponseList
+from .interfaces import IResponse, IResponseList, T
 import inspect
 from .AsyncLogging import AsyncLogger
 from rest_framework.request import Request as DRFRequest
 import logging
-from typing import Dict, Any, Optional, Callable, Tuple, List
+from typing import Dict, Any, Optional, Callable, Tuple, List, Union
 from functools import wraps
 
 
 VIEW_FUNCTION_TYPE = Callable[..., Any]
+
 
 class CustomLoggerAdapter(logging.LoggerAdapter[logging.Logger]):
     def process(self, msg, kwargs):
@@ -41,6 +42,7 @@ custom_logger = CustomLoggerAdapter(logger, {})
 
 def generate_fail_generic_response(
     message: str,
+    code: int = 1,
     data: dict[str, Any] = {},
     user: AwemeCustomUser | AnonymousUser = AnonymousUser(),
     skip_logging: bool = False,
@@ -56,9 +58,8 @@ def generate_fail_generic_response(
         }
     if not skip_logging:
         logger.warn(f"user={user.id}, message={message}, data={data}", extra=extra)
-    data["message"] = message
     filtered_data = {k: v for k, v in data.items() if v is not None}
-    rsp = IResponse(data=filtered_data)
+    rsp = IResponse(code=code, message=message, data=filtered_data)
     return Response(
         rsp.to_dict(),
         status=status.HTTP_400_BAD_REQUEST,
@@ -82,13 +83,52 @@ def generate_success_generic_response(
         }
     if not skip_logging:
         logger.info(f"user={user.id}, message={message}, data={data}", extra=extra)
-    data["message"] = message
     filtered_data = {k: v for k, v in data.items() if v is not None}
-    rsp = IResponse(data=filtered_data)
+    rsp = IResponse(code=0, message=message, data=filtered_data)
     return Response(
         rsp.to_dict(),
         status=status.HTTP_200_OK,
     )
+
+
+def generate_success_list_response(
+    data_list: List[T],
+    total: int,
+    page: int,
+    pagesize: int,
+    message: str = "",
+    user: AwemeCustomUser | AnonymousUser = AnonymousUser(),
+    skip_logging: bool = False,
+) -> Response:
+    frame = inspect.currentframe()
+    extra = {}
+    if frame:
+        frame = frame.f_back
+        extra = {
+            "caller_filename": frame.f_code.co_filename if frame else "missing",
+            "caller_lineno": frame.f_lineno if frame else "missing",
+            "caller_funcName": frame.f_code.co_name if frame else "missing",
+        }
+    if not skip_logging:
+        logger.info(
+            f"user={user.id}, message=List response, total={total}, page={page}, pagesize={pagesize}, count={len(data_list)}",
+            extra=extra,
+        )
+
+    rsp = IResponseList(
+        code=0,
+        message=message,
+        total=total,
+        page=page,
+        pagesize=pagesize,
+        data=data_list,
+    )
+
+    return Response(
+        rsp.to_dict(),
+        status=status.HTTP_200_OK,
+    )
+
 
 def aweme_login_required(
     function: Optional[VIEW_FUNCTION_TYPE] = None,

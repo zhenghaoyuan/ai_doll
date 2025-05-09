@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser, AnonymousUser
 from simple_history.models import HistoricalRecords
 from django.contrib.auth.models import UserManager
 from django.conf import settings
+from .interfaces import IStyleImage
 import datetime
 import os
 import uuid
@@ -68,6 +69,7 @@ class AwemeCustomUser(AbstractUser):
     provider = models.CharField(max_length=255, blank=True, null=True)
     provider_id = models.CharField(max_length=255, blank=True, null=True)
     provider_avatar_url = models.CharField(max_length=255, blank=True, null=True)
+    is_admin = models.BooleanField(default=False)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
@@ -76,3 +78,19 @@ class AwemeCustomUser(AbstractUser):
 
     def __str__(self):
         return self.email
+
+
+class AwemeUserCredits(models.Model):
+    user = models.ForeignKey(AwemeCustomUser, on_delete=models.CASCADE)
+    credits = models.IntegerField(default=0)
+    acc_credits = models.IntegerField(default=0)
+    stripe_customer_id = models.CharField(max_length=255, blank=True, null=True)
+    has_subscription = models.BooleanField(default=False)
+    plan_type = models.CharField(max_length=255, blank=True, null=True)
+    subscription_start_time = models.DateTimeField(null=True)
+    subscription_end_time = models.DateTimeField(null=True)
+    cancel_at_end_time = models.BooleanField(default=False)
+    created_at = models.IntegerField(default=get_timestamp)
+    updated_at = models.IntegerField(default=get_timestamp)
+    history = HistoricalRecords(cascade_delete_history=True)  # Track all the changes
+
