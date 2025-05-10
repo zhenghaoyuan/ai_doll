@@ -46,6 +46,10 @@ ADMIN_ENABLED = env("ADMIN_ENABLED")
 # SECURITY WARNING: keep the secret key used in production secret!
 AWS_CLOUDFRONT_DOMAIN = env("AWS_CLOUDFRONT_DOMAIN")
 SECRET_KEY = env("SECRET_KEY")
+WEBSITE_DOMAIN = env("WEBSITE_DOMAIN")
+STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")
+MEMBERSHIP_TYPE_BASIC_MONTHLY = "price_1RMTLqDORkylPKejrhlX8fip"
+MEMBERSHIP_TYPE_PRO_MONTHLY = "price_1RMTNaDORkylPKejqA2w9e0X"
 
 
 if ENVIRONMENT == "prod":
@@ -116,15 +120,15 @@ WSGI_APPLICATION = "ai_doll.wsgi.application"
 #         "NAME": BASE_DIR / "db.sqlite3",
 #     }
 # }
-if 'RDS_HOSTNAME' in os.environ:
+if env('RDS_HOSTNAME', default=None):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': os.environ['RDS_DB_NAME'],
-            'USER': os.environ['RDS_USERNAME'],
-            'PASSWORD': os.environ['RDS_PASSWORD'],
-            'HOST': os.environ['RDS_HOSTNAME'],
-            'PORT': os.environ['RDS_PORT'],
+            'NAME': env('RDS_DB_NAME'),
+            'USER': env('RDS_USERNAME'),
+            'PASSWORD': env('RDS_PASSWORD'),
+            'HOST': env('RDS_HOSTNAME'),
+            'PORT': env('RDS_PORT'),
         }
     }
 else:
